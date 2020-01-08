@@ -15,9 +15,12 @@ regression_data <- data.frame(
          ) %>%
   select(-noise)
 
+levels(regression_data$sex) <- c("Male", "Female")
+
 # One continuous predictor
 formula <- y ~ x
-ggplot(data = regression_data, aes(x = weight, y = height)) +
+regression_data %>%
+ggplot(aes(x = weight, y = height)) +
   geom_smooth(method = "lm", se=FALSE, color="black") +
   stat_poly_eq(formula = formula,
                eq.with.lhs = "italic(y)~`=`~",
@@ -34,3 +37,29 @@ ggplot(data = regression_data, aes(x = weight, y = height)) +
   theme(
     text = element_text(size = 20)
   )
+
+# Two continuous predictors
+nzhs <- readRDS("nzhs2017.RDS")
+
+summary(lm("k10 ~ age + nzdep", nzhs))$coefficients %>%
+  round(., 4)
+
+# One continuous and one categorical
+regression_data %>%
+  ggplot(aes(x = weight, y = height, group=sex, color=sex)) +
+  geom_smooth(method = "lm", se=FALSE, aes(linetype=sex)) +
+  geom_point(aes(shape=sex)) +
+  theme_classic() +
+  labs(
+    x="Weight (x)",
+    y="Height (y)",
+    color="Sex",
+    linetype="Sex",
+    shape="Sex"
+  ) +
+  theme(
+    text = element_text(size = 20)
+  )
+
+summary(lm("height ~ sex + weight", regression_data))$coefficients %>%
+  round(., 4)
