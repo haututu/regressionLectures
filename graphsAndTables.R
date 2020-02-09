@@ -17,7 +17,7 @@ regression_data <- data.frame(
 
 levels(regression_data$sex) <- c("Male", "Female")
 
-# One continuous predictor
+########## One continuous predictor
 formula <- y ~ x
 regression_data %>%
 ggplot(aes(x = weight, y = height)) +
@@ -39,12 +39,14 @@ ggplot(aes(x = weight, y = height)) +
   )
 
 # Two continuous predictors
-nzhs <- readRDS("nzhs2017.RDS")
+nzhs <- readRDS("data/nzhs2017.RDS")
 
 summary(lm("k10 ~ age + nzdep", nzhs))$coefficients %>%
   round(., 4)
 
-# One continuous and one categorical
+summary(lm("k10 ~ age + nzdep", nzhs))
+
+########## One continuous and one categorical
 regression_data %>%
   ggplot(aes(x = weight, y = height, group=sex, color=sex)) +
   geom_smooth(method = "lm", se=FALSE, aes(linetype=sex)) +
@@ -64,7 +66,9 @@ regression_data %>%
 summary(lm("height ~ sex + weight", regression_data))$coefficients %>%
   round(., 4)
 
-# Interaction between continous and categorical variable
+summary(lm("height ~ sex + weight", regression_data))
+
+########## Interaction between continous and categorical variable
 summary(lm("k10 ~ age * nzdep", nzhs))$coefficients %>%
   round(., 4)
 
@@ -82,7 +86,10 @@ nzhs %>%
     text = element_text(size = 20)
   )
 
-# Interaction between continuous variables
+summary(lm("k10 ~ age * sex", nzhs))$coefficients %>%
+  round(., 4)
+
+########## Interaction between continuous variables
 interaction_data <- readRDS("../../../socialMediaMood/dataForBen.RDS") %>%
   select(id, day, sn, fomo, negative) %>%
   group_by(id, day) %>%
@@ -113,3 +120,15 @@ interaction_data %>%
 
 summary(lm("negative ~ sn * fomo", interaction_data))$coefficients %>%
   round(., 4)
+
+########## Drug study
+dat <- readxl::read_xlsx("data/drug_data.xlsx") %>%
+  janitor::clean_names()
+
+library(lavaan)
+
+cfa.memory <- cfa(
+  paste("memory =~", paste(select(dat, contains("cvlt")) %>% colnames(), collapse=" + ")),
+  data = dat
+  )
+
